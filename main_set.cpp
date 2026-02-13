@@ -30,34 +30,43 @@ void playGame(set<Card>& alice, set<Card>& bob) {
     while (matchFound) {
         matchFound = false;
 
-        // Alice's turn:
+        // Alice's turn
+        Card toRemove;
+        bool found = false;
         for (auto it = alice.begin(); it != alice.end(); ++it) {
-            if (bob.find(*it) != bob.end()) {
-                cout << "Alice picked matching card " << *it << endl;
-
-                bob.erase(*it);
-                alice.erase(it);
-
-                matchFound = true;
+            if (bob.count(*it)) {
+                toRemove = *it;
+                found = true;
                 break;
             }
+        }
+        if (found) {
+            cout << "Alice picked matching card " << toRemove << "\n";
+            alice.erase(toRemove);
+            bob.erase(toRemove);
+            matchFound = true;
         }
 
         if (!matchFound) break;
 
         matchFound = false;
 
-        // Bob's turn:
-        for (auto it = bob.rbegin(); it != bob.rend(); ++it) {
-            if (alice.find(*it) != alice.end()) {
-                cout << "Bob picked matching card " << *it << endl;
-
-                alice.erase(*it);
-                bob.erase(*it);
-
-                matchFound = true;
+        //Bob's turn:
+        Card toRemove;
+        bool found = false;
+        for (auto it = prev(bob.end()); ; --it) {
+            if (alice.count(*it)) {
+                toRemove = *it;
+                found = true;
                 break;
             }
+            if (it == bob.begin()) break;
+        }
+        if (found) {
+            cout << "Bob picked matching card " << toRemove << "\n";
+            alice.erase(toRemove);
+            bob.erase(toRemove);
+            matchFound = true;
         }
     }
     cout << endl;
