@@ -30,26 +30,26 @@ void playGame(CardList& alice, CardList& bob) {
     while (matchFound) {
         matchFound = false;
 
-        // Alice's turn: forward iteration (smallest to largest)
+        // Alice's turn: forward iteration (smallest to largest) 
         Card toRemove;
         bool aliceFound = false;
 
-        for (auto it = alice.begin(); it != alice.end(); ++it) {
+        for (auto it = alice.begin(); it != alice.end(); ) {
             if (bob.contains(*it)) {
-                toRemove = *it;  // store matching card
+                toRemove = *it;   // store the matching card
+                ++it;             // advance iterator before removing
+                std::cout << "Alice picked matching card " << toRemove << std::endl;
+                alice.remove(toRemove);
+                bob.remove(toRemove);
+                matchFound = true;
                 aliceFound = true;
-                break;           // stop at first match
+                break;            // stop after first match
+            } else {
+                ++it;
             }
         }
 
-        if (aliceFound) {
-            std::cout << "Alice picked matching card " << toRemove << std::endl;
-            alice.remove(toRemove);
-            bob.remove(toRemove);
-            matchFound = true;
-        }
-
-        if (!matchFound) break; // no more matches
+        if (!aliceFound) break;  // no more matches, game ends
 
         matchFound = false;
 
@@ -57,23 +57,25 @@ void playGame(CardList& alice, CardList& bob) {
         Card bobRemove;
         bool bobFound = false;
 
-        for (auto it = bob.rbegin(); it != bob.rend(); --it) {
+        for (auto it = bob.rbegin(); it != bob.rend(); ) {
             if (alice.contains(*it)) {
-                bobRemove = *it;  // store matching card
+                bobRemove = *it;   // store the matching card
+                --it;              // move iterator backward before removing
+                std::cout << "Bob picked matching card " << bobRemove << std::endl;
+                alice.remove(bobRemove);
+                bob.remove(bobRemove);
+                matchFound = true;
                 bobFound = true;
-                break;             // stop at first match
+                break;             // stop after first match
+            } else {
+                --it;
             }
         }
-
-        if (bobFound) {
-            std::cout << "Bob picked matching card " << bobRemove << std::endl;
-            alice.remove(bobRemove);
-            bob.remove(bobRemove);
-            matchFound = true;
-        }
     }
+
     cout << endl;
 }
+
 
 
 
