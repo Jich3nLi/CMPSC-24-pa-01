@@ -32,40 +32,43 @@ void playGame(CardList& alice, CardList& bob) {
 
         // Alice's turn: forward iteration (smallest to largest)
         for (auto it = alice.begin(); it != alice.end(); ++it) {
-            if (bob.contains(*it)) {
-                Card matchingCard = *it;
+            const Card& matchingCard = *it;  // use reference, no copy
+            if (bob.contains(matchingCard)) {
                 std::cout << "Alice picked matching card " << matchingCard << std::endl;
-                
+
                 // Remove from both hands
                 alice.remove(matchingCard);
                 bob.remove(matchingCard);
-                
+
                 matchFound = true;
-                break;  // Stop after first match
+                break;  // stop after first match
             }
         }
 
-        if (!matchFound) break;  // No match found, game ends
+        if (!matchFound) break;  // no match found, game ends
 
         matchFound = false;
 
         // Bob's turn: reverse iteration (largest to smallest)
-        for (auto it = bob.rbegin(); it != bob.rend(); ++it) {
-            if (alice.contains(*it)) {
-                Card matchingCard = *it;
+        for (auto it = bob.rbegin(); it != bob.rend(); --it) {
+            const Card& matchingCard = *it;  // reference
+            if (alice.contains(matchingCard)) {
                 std::cout << "Bob picked matching card " << matchingCard << std::endl;
-                
+
                 // Remove from both hands
                 alice.remove(matchingCard);
                 bob.remove(matchingCard);
-                
+
                 matchFound = true;
-                break;  // Stop after first match
+                break;  // stop after first match
             }
         }
     }
-    cout << endl;
+
+    std::cout << std::endl;
 }
+
+
 
 int main(int argc, char** argv) {
     if (argc < 3) {

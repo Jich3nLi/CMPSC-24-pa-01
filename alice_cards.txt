@@ -14,3 +14,10 @@ h 5
 h 10
 h j
 h k
+h 7
+s j
+s 9
+s 8
+c 8
+d 5
+d 6

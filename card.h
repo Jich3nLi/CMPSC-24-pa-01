@@ -22,7 +22,6 @@ class Card {
         bool operator<(const Card& other) const;
         bool operator==(const Card& other) const;
         bool operator>(const Card& other) const;
-        Card& operator=(const Card& other);
 
         friend std::ostream& operator<<(std::ostream& os, const Card& card);
 };
