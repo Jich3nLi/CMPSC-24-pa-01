@@ -21,56 +21,62 @@ void printHand(const string& name, const set<Card>& hand) {
     for (const Card& c : hand) {
         cout << c << endl;
     }
-    cout << endl;
 }
 
-void playGame(set<Card>& alice, set<Card>& bob) {
+#include <set>
+#include <iostream>
+#include "card.h"
+
+void playGame(std::set<Card>& alice, std::set<Card>& bob) {
     bool matchFound = true;
 
     while (matchFound) {
         matchFound = false;
 
-        // Alice's turn
+        // Alice's turn: forward iteration (smallest to largest)
         Card toRemove;
-        bool found = false;
+        bool aliceFound = false;
         for (auto it = alice.begin(); it != alice.end(); ++it) {
-            if (bob.count(*it)) {
-                toRemove = *it;
-                found = true;
-                break;
+            if (bob.find(*it) != bob.end()) {
+                toRemove = *it;  // store matching card
+                aliceFound = true;
+                break;           // stop at first match
             }
         }
-        if (found) {
-            cout << "Alice picked matching card " << toRemove << "\n";
+
+        if (aliceFound) {
+            std::cout << "Alice picked matching card " << toRemove << std::endl;
             alice.erase(toRemove);
             bob.erase(toRemove);
             matchFound = true;
         }
 
-        if (!matchFound) break;
+        if (!matchFound) break; // no more matches
 
         matchFound = false;
 
-        //Bob's turn:
-        Card toRemove;
-        bool found = false;
-        for (auto it = prev(bob.end()); ; --it) {
-            if (alice.count(*it)) {
-                toRemove = *it;
-                found = true;
-                break;
+        // Bob's turn: reverse iteration (largest to smallest)
+        Card bobRemove;
+        bool bobFound = false;
+        for (auto it = bob.rbegin(); it != bob.rend(); ++it) {
+            if (alice.find(*it) != alice.end()) {
+                bobRemove = *it;
+                bobFound = true;
+                break;  // stop at first match
             }
-            if (it == bob.begin()) break;
         }
-        if (found) {
-            cout << "Bob picked matching card " << toRemove << "\n";
-            alice.erase(toRemove);
-            bob.erase(toRemove);
+
+        if (bobFound) {
+            std::cout << "Bob picked matching card " << bobRemove << std::endl;
+            alice.erase(bobRemove);
+            bob.erase(bobRemove);
             matchFound = true;
         }
     }
     cout << endl;
 }
+
+
 
 int main(int argc, char** argv) {
     if (argc < 3) {
@@ -107,6 +113,7 @@ int main(int argc, char** argv) {
     playGame(alice, bob);
 
     printHand("Alice", alice);
+    cout << endl;
     printHand("Bob", bob);
 
     return 0;
