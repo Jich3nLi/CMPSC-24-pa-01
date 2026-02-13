@@ -22,18 +22,50 @@ CardList::CardList() {
 
 // destructor deletes all nodes
 CardList::~CardList() {
-    clear(root);
+    clear();
 }
 
-// recursive helper for destructor
-void CardList::clear(CardList::Node* n) {
-    if (n == nullptr) {
-        return;
-    }
+// clear the entire tree
+void CardList::clear() {
+    deleteTree(root);
+    root = nullptr;
+}
 
-    clear(n -> left);
-    clear(n -> right);
-    delete n;
+// clear helper function
+void CardList::deleteTree(Node* node) {
+    if (!node) return;
+    deleteTree(node->left);
+    deleteTree(node->right);
+    delete node;
+}
+
+
+// deep copy 
+CardList::CardList(const CardList& other) : root(nullptr) {
+    root = copyTree(other.root, nullptr);
+}
+
+// deep copy helper function
+CardList::Node* CardList::copyTree(Node* node, Node* parent) {
+    if (!node) return nullptr;
+
+    Node* newNode = new Node(node->info);
+    newNode->parent = parent;
+
+    newNode->left = copyTree(node->left, newNode);
+    newNode->right = copyTree(node->right, newNode);
+
+    return newNode;
+}
+
+CardList& CardList::operator=(const CardList& other) {
+    if (this == &other) return *this;
+
+    clear();  // delete existing tree
+
+    root = copyTree(other.root, nullptr);
+
+    return *this;
 }
 
 // insert card in tree
@@ -190,27 +222,25 @@ void CardList::remove(const Card& card) {
     }
     // Case 3: Two children
     else {
-        // Find successor (minimum in right subtree)
         Node* succ = node->right;
         while (succ->left) {
             succ = succ->left;
         }
-        
-        // Copy successor's info to current node
+
         node->info = succ->info;
-        
-        // Remove the successor (which will have 0 or 1 child)
-        if (succ->parent->left == succ) {
-            succ->parent->left = succ->right;
-            if (succ->right) {
-                succ->right->parent = succ->parent;
-            }
+
+        Node* child = succ->right;  // successor never has left child
+
+        if (succ == succ->parent->left) {
+            succ->parent->left = child;
         } else {
-            succ->parent->right = succ->right;
-            if (succ->right) {
-                succ->right->parent = succ->parent;
-            }
+            succ->parent->right = child;
         }
+
+        if (child) {
+            child->parent = succ->parent;
+        }
+
         delete succ;
     }
 }

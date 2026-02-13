@@ -23,6 +23,9 @@ class CardList {
         CardList();
         ~CardList();
 
+        CardList(const CardList& other); // deep copy 
+        CardList& operator=(const CardList& other);
+
         void clear(Node* n);
 
         void insert(const Card& card);
