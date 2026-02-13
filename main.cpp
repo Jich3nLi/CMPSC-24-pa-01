@@ -30,9 +30,9 @@ void playGame(CardList& alice, CardList& bob) {
     while (matchFound) {
         matchFound = false;
 
-        // Alice's turn: forward iteration (smallest to largest)
-        for (auto it = alice.begin(); it != alice.end(); ++it) {
-            const Card& matchingCard = *it;  // use reference, no copy
+        // Alice's turn: forward iteration
+        for (auto it = alice.begin(); it != alice.end(); /* ++it inside */) {
+            const Card& matchingCard = *it;
             if (bob.contains(matchingCard)) {
                 std::cout << "Alice picked matching card " << matchingCard << std::endl;
 
@@ -41,17 +41,19 @@ void playGame(CardList& alice, CardList& bob) {
                 bob.remove(matchingCard);
 
                 matchFound = true;
-                break;  // stop after first match
+                break;  // restart iteration
+            } else {
+                ++it;
             }
         }
 
-        if (!matchFound) break;  // no match found, game ends
+        if (!matchFound) break;  // no more matches
 
         matchFound = false;
 
-        // Bob's turn: reverse iteration (largest to smallest)
-        for (auto it = bob.rbegin(); it != bob.rend(); --it) {
-            const Card& matchingCard = *it;  // reference
+        // Bob's turn: reverse iteration
+        for (auto it = bob.rbegin(); it != bob.rend(); /* --it inside */) {
+            const Card& matchingCard = *it;
             if (alice.contains(matchingCard)) {
                 std::cout << "Bob picked matching card " << matchingCard << std::endl;
 
@@ -60,13 +62,16 @@ void playGame(CardList& alice, CardList& bob) {
                 bob.remove(matchingCard);
 
                 matchFound = true;
-                break;  // stop after first match
+                break;  // restart iteration
+            } else {
+                --it;
             }
         }
     }
 
     std::cout << std::endl;
 }
+
 
 
 
