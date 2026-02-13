@@ -28,29 +28,37 @@ void playGame(CardList& alice, CardList& bob) {
     bool matchFound = true;
 
     while (matchFound) {
-        matchFound = false;  // Assume no matches this round
+        matchFound = false;
 
-        // Alice's turn: forward iteration (smallest to largest) 
+        // Alice's turn: forward iteration (smallest to largest)
         for (auto it = alice.begin(); it != alice.end(); ++it) {
             if (bob.contains(*it)) {
                 Card matchingCard = *it;
-                cout << "Alice picked matching card " << matchingCard << std::endl;
+                std::cout << "Alice picked matching card " << matchingCard << std::endl;
+                
+                // Remove from both hands
                 alice.remove(matchingCard);
                 bob.remove(matchingCard);
+                
                 matchFound = true;
                 break;  // Stop after first match
             }
         }
 
-        if (!matchFound) break;  // No match found by Alice, game ends
+        if (!matchFound) break;  // No match found, game ends
+
+        matchFound = false;
 
         // Bob's turn: reverse iteration (largest to smallest)
         for (auto it = bob.rbegin(); it != bob.rend(); ++it) {
             if (alice.contains(*it)) {
                 Card matchingCard = *it;
-                cout << "Bob picked matching card " << matchingCard << std::endl;
+                std::cout << "Bob picked matching card " << matchingCard << std::endl;
+                
+                // Remove from both hands
                 alice.remove(matchingCard);
                 bob.remove(matchingCard);
+                
                 matchFound = true;
                 break;  // Stop after first match
             }
