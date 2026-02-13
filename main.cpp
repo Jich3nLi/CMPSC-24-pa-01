@@ -71,15 +71,10 @@ void playGame(CardList& alice, CardList& bob) {
                 --it;
             }
         }
+        if (!bobFound) break;  // no more matches, game ends
     }
-
     cout << endl;
 }
-
-
-
-
-
 
 int main(int argc, char** argv) {
     if (argc < 3) {
