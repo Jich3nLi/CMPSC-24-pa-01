@@ -61,6 +61,7 @@ void playGame(CardList& alice, CardList& bob) {
         // If neither picked a card, game ends
         if (!alicePicked && !bobPicked) break;
     }
+    cout << endl;
 }
 
 
