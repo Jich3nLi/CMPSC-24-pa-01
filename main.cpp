@@ -72,6 +72,7 @@ void playGame(CardList& alice, CardList& bob) {
             matchFound = true;
         }
     }
+    cout << endl;
 }
 
 
