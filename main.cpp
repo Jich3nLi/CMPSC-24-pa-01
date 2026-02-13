@@ -25,52 +25,44 @@ void printHand(const string& name, CardList& hand) {
 
 // The main gameplay function
 void playGame(CardList& alice, CardList& bob) {
-    bool matchFound = true;
+    while (true) {
+        bool alicePicked = false;
+        bool bobPicked = false;
 
-    while (matchFound) {
-        matchFound = false;
-
-        // Alice's turn: forward iteration
-        for (auto it = alice.begin(); it != alice.end(); /* ++it inside */) {
-            const Card& matchingCard = *it;
-            if (bob.contains(matchingCard)) {
+        // Alice's turn: forward iteration (smallest to largest)
+        for (auto it = alice.begin(); it != alice.end(); ++it) {
+            if (bob.contains(*it)) {
+                Card matchingCard = *it;
                 std::cout << "Alice picked matching card " << matchingCard << std::endl;
 
                 // Remove from both hands
                 alice.remove(matchingCard);
                 bob.remove(matchingCard);
 
-                matchFound = true;
-                break;  // restart iteration
-            } else {
-                ++it;
+                alicePicked = true;
+                break;  // stop after first match
             }
         }
 
-        if (!matchFound) break;  // no more matches
-
-        matchFound = false;
-
-        // Bob's turn: reverse iteration
-        for (auto it = bob.rbegin(); it != bob.rend(); /* --it inside */) {
-            const Card& matchingCard = *it;
-            if (alice.contains(matchingCard)) {
+        // Bob's turn: reverse iteration (largest to smallest)
+        for (auto it = bob.rbegin(); it != bob.rend(); --it) {
+            if (alice.contains(*it)) {
+                Card matchingCard = *it;
                 std::cout << "Bob picked matching card " << matchingCard << std::endl;
 
                 // Remove from both hands
                 alice.remove(matchingCard);
                 bob.remove(matchingCard);
 
-                matchFound = true;
-                break;  // restart iteration
-            } else {
-                --it;
+                bobPicked = true;
+                break;  // stop after first match
             }
         }
+        // If neither picked a card, game ends
+        if (!alicePicked && !bobPicked) break;
     }
-
-    std::cout << std::endl;
 }
+
 
 
 

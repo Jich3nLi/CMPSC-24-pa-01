@@ -22,11 +22,13 @@ class CardList {
     public:
         CardList();
         ~CardList();
+        void clear();
+        void deleteTree(Node* n);
 
         CardList(const CardList& other); // deep copy 
-        CardList& operator=(const CardList& other);
+        Node* copyTree(Node* node, Node* parent);
 
-        void clear(Node* n);
+        CardList& operator=(const CardList& other);
 
         void insert(const Card& card);
         void remove(const Card& card);
