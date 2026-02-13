@@ -16,6 +16,14 @@ int suitRank(char s) {
     }
 }
 
+Card& Card::operator=(const Card& other) {
+    if (this != &other) {  
+        suit = other.suit;
+        value = other.value;
+    }
+    return *this;
+}
+
 bool Card::operator<(const Card& other) const {
     if (suitRank(suit) != suitRank(other.suit)) {
         return suitRank(suit) < suitRank(other.suit);
