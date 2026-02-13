@@ -8,33 +8,97 @@
 
 using namespace std;
 
-int main(int argv, char** argc){
-  if(argv < 3){
-    cout << "Please provide 2 file names" << endl;
-    return 1;
-  }
-  
-  ifstream cardFile1 (argc[1]);
-  ifstream cardFile2 (argc[2]);
-  string line;
+int cardValue(const string& str) {
+    if (str == "a") return 1;
+    if (str == "j") return 11;
+    if (str == "q") return 12;
+    if (str == "k") return 13;
+    return stoi(str);
+}
 
-  if (cardFile1.fail() || cardFile2.fail() ){
-    cout << "Could not open file " << argc[2];
-    return 1;
-  }
+void printHand(const string& name, const set<Card>& hand) {
+    cout << name << "'s cards:\n";
+    for (const Card& c : hand) {
+        cout << c << endl;
+    }
+    cout << endl;
+}
 
-  //Read each file
-  while (getline (cardFile1, line) && (line.length() > 0)){
+void playGame(set<Card>& alice, set<Card>& bob) {
+    bool matchFound = true;
 
-  }
-  cardFile1.close();
+    while (matchFound) {
+        matchFound = false;
 
+        // Alice's turn:
+        for (auto it = alice.begin(); it != alice.end(); ++it) {
+            if (bob.find(*it) != bob.end()) {
+                cout << "Alice picked matching card " << *it << endl;
 
-  while (getline (cardFile2, line) && (line.length() > 0)){
+                bob.erase(*it);
+                alice.erase(it);
 
-  }
-  cardFile2.close();
-  
-  
-  return 0;
+                matchFound = true;
+                break;
+            }
+        }
+
+        if (!matchFound) break;
+
+        matchFound = false;
+
+        // Bob's turn:
+        for (auto it = bob.rbegin(); it != bob.rend(); ++it) {
+            if (alice.find(*it) != alice.end()) {
+                cout << "Bob picked matching card " << *it << endl;
+
+                alice.erase(*it);
+                bob.erase(*it);
+
+                matchFound = true;
+                break;
+            }
+        }
+    }
+    cout << endl;
+}
+
+int main(int argc, char** argv) {
+    if (argc < 3) {
+        cout << "Please provide 2 file names\n";
+        return 1;
+    }
+
+    ifstream fileAlice(argv[1]);
+    ifstream fileBob(argv[2]);
+
+    if (!fileAlice || !fileBob) {
+        cout << "Error opening files\n";
+        return 1;
+    }
+
+    set<Card> alice;
+    set<Card> bob;
+    string line;
+
+    // Read Alice
+    while (getline(fileAlice, line) && !line.empty()) {
+        char suit = line[0];
+        string valStr = line.substr(2);
+        alice.insert(Card(suit, cardValue(valStr)));
+    }
+
+    // Read Bob
+    while (getline(fileBob, line) && !line.empty()) {
+        char suit = line[0];
+        string valStr = line.substr(2);
+        bob.insert(Card(suit, cardValue(valStr)));
+    }
+
+    playGame(alice, bob);
+
+    printHand("Alice", alice);
+    printHand("Bob", bob);
+
+    return 0;
 }

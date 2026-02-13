@@ -6,20 +6,27 @@
 #include "card.h"
 
 #include <iostream>
-using std::cout;
+using namespace std;
+
+CardList::Node::Node(const Card& c) {
+    info = c;
+    left = nullptr;
+    right = nullptr;
+    parent = nullptr;
+}
 
 // constructor sets up empty tree
-CardBST::CardBST() { 
+CardList::CardList() { 
     root = nullptr;
 }
 
 // destructor deletes all nodes
-CardBST::~CardBST() {
+CardList::~CardList() {
     clear(root);
 }
 
 // recursive helper for destructor
-void CardBST::clear(Node *n) {
+void CardList::clear(CardList::Node* n) {
     if (n == nullptr) {
         return;
     }
@@ -29,232 +36,223 @@ void CardBST::clear(Node *n) {
     delete n;
 }
 
-// insert value in tree; return false if duplicate
-bool CardBST::insert(Card card) {
+// insert card in tree
+void CardList::insert(const Card& card) {
+    Node* newNode = new Node(card);
+
     if (root == nullptr) {
-        root = new Node(card);
-        return true;
+        root = newNode;
+        return;
     }
-    return insert(card, root);
-}
 
-// recursive helper for insert (assumes n is never 0)
-bool CardBST::insert(Card card, Node* n) {
-    if (n -> info > card) {
-        if (n -> left == nullptr) {
-            n -> left = new Node(card);
-            n -> left -> parent = n;
-            return true;
-        } else {
-            return insert(card, n -> left);
+    Node* current = root;
+    Node* parent = nullptr;
+
+    while (current != nullptr) {
+        parent = current;
+
+        if (card < current -> info)
+            current = current -> left;
+        else if (card > current -> info)
+            current = current -> right;
+        else {
+            delete newNode;
+            return;
         }
-    } else if (n -> info < card) {
-        if (n -> right == nullptr) {
-            n -> right = new Node(card);
-            n -> right -> parent = n;
-            return true;
-        } else {
-            return insert(card, n -> right);
-        }
-    } else {
-        return false;
     }
+
+    newNode -> parent = parent;
+
+    if (card < parent -> info)
+        parent -> left = newNode;
+    else
+        parent -> right = newNode;
 }
 
-// print tree data pre-order
-void CardBST::printPreOrder() const {
-    printPreOrder(root);
-}
+// find node in tree
+CardList::Node* CardList::findNode(const Card& card) const {
+    Node* current = root;
 
-// recursive helper for printPreOrder()
-void CardBST::printPreOrder(Node *n) const {
-    if (n == nullptr) {
-        return;
+    while (current) {
+        if (card < current -> info)
+            current = current -> left;
+        else if (card > current -> info)
+            current = current -> right;
+        else
+            return current;
     }
-    cout << n -> info << " ";
-    printPreOrder(n -> left);
-    printPreOrder(n -> right);
+
+    return nullptr;
 }
 
-// print tree data in-order, with helper
-void CardBST::printInOrder() const {
-    printInOrder(root);
-}
-void CardBST::printInOrder(Node *n) const {
-    if (n == nullptr) {
-        return;
-    }
-    printInOrder(n -> left);
-    cout << n -> info << " ";
-    printInOrder(n -> right);
+// check if node in tree; return true if yes, otherwise false
+bool CardList::contains(const Card& card) const {
+    return findNode(card) != nullptr;
 }
 
-// prints tree data post-order, with helper
-void CardBST::printPostOrder() const {
-    printPostOrder(root);
-}
 
-void CardBST::printPostOrder(Node *n) const {
-    if (n == nullptr) {
-        return;
-    }
-    printPostOrder(n -> left);
-    printPostOrder(n -> right);
-    cout << n -> info << " ";
-}
-
-// return count of values
-int CardBST::count() const {
-    return count(root);
-}
-
-// recursive helper for count
-int CardBST::count(Node *n) const {
-    if (n == nullptr) {
-        return 0;
-    } 
-    return count(n -> left) + count(n -> right) + 1;
-}
-
-// IMPLEMENT THIS FIRST: returns the node for a given value or NULL if none exists
-// Parameters:
-// int value: the value to be found
-// Node* n: the node to start with (for a recursive call)
-// Whenever you call this method from somewhere else, pass it
-// the root node as "n"
-CardBST::Node* CardBST::getNodeFor(Card card, Node* n) const{
+// find minimum card in tree
+CardList::Node* CardList::getMin(Node* n) const {
     if (n == nullptr) {
         return nullptr;
     }
-    if (n -> info > card) {
-        return getNodeFor(card, n -> left);
-    } else if (n -> info < card) {
-        return getNodeFor(card, n -> right);
-    } else {
-        return n;
+
+    while (n -> left != nullptr) {
+        n = n -> left;
     }
+
+    return n;
 }
 
-// returns true if value is in the tree; false if not
-bool CardBST::contains(Card card) const {
-    return (getNodeFor(card, root) != nullptr); 
+// find maximum card in tree
+CardList::Node* CardList::getMax(Node* n) const {
+    if (n == nullptr) {
+        return nullptr;
+    }
+
+    while (n -> right != nullptr) {
+        n = n -> right;
+    }
+
+    return n;
+}
+
+
+// returns the Node containing the successor of the given value
+CardList::Node* CardList::getSuccessor(Node* node) const {
+    if (node == nullptr) {
+        return nullptr;
+    }
+
+    if (node -> right != nullptr) {
+        return getMin(node->right);
+    }
+
+    Node* parent = node -> parent;
+    while (parent && node == parent -> right) {
+        node = parent;
+        parent = parent -> parent;
+    }
+
+    return parent;
 }
 
 // returns the Node containing the predecessor of the given value
-CardBST::Node* CardBST::getPredecessorNode(Card card) const{
-    if (root == nullptr) {
+CardList::Node* CardList::getPredecessor(Node* node) const {
+    if (node == nullptr) {
         return nullptr;
     }
 
-    Node* curr = getNodeFor(card, root);
-
-    if (curr == nullptr) {
-        return nullptr;
+    if (node -> left) {
+        return getMax(node -> left);
     }
 
-    if (curr -> left != nullptr) {
-        curr = curr -> left;
-        while (curr -> right != nullptr) {
-            curr = curr -> right;
-        }
-        return curr;
-    } else {
-        while (curr -> parent != nullptr && curr -> parent -> left == curr) {
-            curr = curr -> parent;
-        }
-        curr = curr -> parent;
-        return curr;
-    }
-    return nullptr;
-}
-
-// returns the predecessor value of the given value or 0 if there is none
-Card CardBST::getPredecessor(Card card) const{
-    Node* predecessor = getPredecessorNode(card);
-    if (predecessor == nullptr) {
-        return Card();
-    }
-    return predecessor -> info;
-}
-
-// returns the Node containing the successor of the given value
-CardBST::Node* CardBST::getSuccessorNode(Card card) const{
-    if (root == nullptr) {
-        return nullptr;
+    Node* parent = node -> parent;
+    while (parent && node == parent -> left) {
+        node = parent;
+        parent = parent -> parent;
     }
 
-    Node* curr = getNodeFor(card, root);
-
-    if (curr == nullptr) {
-        return nullptr;
-    }
-    
-    if (curr -> right != nullptr) {
-        curr = curr -> right;
-        while (curr -> left != nullptr) {
-            curr = curr -> left;
-        }
-        return curr;
-    } else {
-        while (curr -> parent != nullptr && curr -> parent -> right == curr) {
-            curr = curr -> parent;
-        } 
-        curr = curr -> parent;
-        return curr;
-    }
-    return nullptr;
-}
-
-// returns the successor value of the given value or 0 if there is none
-Card CardBST::getSuccessor(Card card) const{
-    Node* successor = getSuccessorNode(card);
-    if (successor == nullptr) {
-        return Card();
-    }
-    return successor -> info;
+    return parent;
 }
 
 // deletes the Node containing the given value from the tree
-// returns true if the node exist and was deleted or false if the node does not exist
-bool CardBST::remove(Card card){
-    Node* nodeToDelete = getNodeFor(card, root);
-
-    if (nodeToDelete == nullptr) {
-        return false;
-    }
-    // Case 1: To delete node having two children, we can replace the value in nodeToDelete 
-    // with the value of the successor, and then delete the successor (successors can't have
-    // 2 children).
-    if (nodeToDelete -> left != nullptr && nodeToDelete -> right != nullptr) {
-        Node* successor = getSuccessorNode(card);
-        nodeToDelete -> info = successor -> info;
-        nodeToDelete = successor; 
-    }
-    // Case 2: Delete node with one or zero child
-    Node* child = nullptr;
-    if (nodeToDelete -> left != nullptr) {
-        child = nodeToDelete -> left;
-    } else {
-        child = nodeToDelete -> right;
+void CardList::remove(const Card& card) {
+    Node* node = findNode(card);
+    if (!node) {
+        return;
     }
 
-    if (nodeToDelete -> parent == nullptr) {
-        root = child;
-        if (child != nullptr) {
-            child->parent = nullptr;
+    // Case 1: No children
+    if (!node -> left && !node -> right) {
+        if (!node -> parent) {
+            root = nullptr;
+        } else if (node == node -> parent -> left) {
+            node -> parent -> left = nullptr;
+        } else {
+            node -> parent -> right = nullptr;
         }
-        delete nodeToDelete;
-        return true;
-    } else if (nodeToDelete == nodeToDelete -> parent -> left) {
-        nodeToDelete -> parent -> left = child;
-    } else {
-        nodeToDelete -> parent -> right = child;
+
+        delete node;
     }
 
-    if (child != nullptr) {
-        child -> parent = nodeToDelete -> parent;
+    // Case 2: One child
+    else if (!node -> left || !node -> right) {
+        Node* child = node -> left ? node -> left : node -> right;
+
+        if (!node -> parent) {
+            root = child;
+        } else if (node == node -> parent -> left) {
+            node -> parent -> left = child;
+        } else {
+            node -> parent -> right = child;
+        }
+
+        child -> parent = node -> parent;
+        delete node;
     }
 
-    delete nodeToDelete;
-    return true;
+    // Case 3: Two children
+    else {
+        Node* succ = getSuccessor(node);
+        node -> info = succ -> info;
+        remove(succ -> info);
+    }
 }
+
+// Iterator constructor
+CardList::Iterator::Iterator(Node* n, const CardList* t) : current(n), tree(t) {}
+
+// Dereference operator
+const Card& CardList::Iterator::operator*() const {
+    return current -> info;
+}
+
+// ++ operator
+CardList::Iterator& CardList::Iterator::operator++() {
+    if (current == nullptr) {
+        return *this;
+    }
+
+    current = tree -> getSuccessor(current);
+    return *this;
+}
+
+// -- operator
+CardList::Iterator& CardList::Iterator::operator--() {
+    if (current == nullptr) {
+        current = tree -> getMax(tree -> root);
+    } else {
+        current = tree -> getPredecessor(current);
+    }
+
+    return *this;
+}
+
+// == operator
+bool CardList::Iterator::operator==(const Iterator& other) const {
+    return current == other.current;
+}
+
+// != operator
+bool CardList::Iterator::operator!=(const Iterator& other) const {
+    return current != other.current;
+}
+
+CardList::Iterator CardList::begin() const {
+    return Iterator(getMin(root), this);
+}
+
+CardList::Iterator CardList::end() const {
+    return Iterator(nullptr, this);
+}
+
+CardList::Iterator CardList::rbegin() const {
+    return Iterator(getMax(root), this);
+}
+
+CardList::Iterator CardList::rend() const {
+    return Iterator(nullptr, this);
+}
+
+

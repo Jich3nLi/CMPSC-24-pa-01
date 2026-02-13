@@ -9,7 +9,7 @@ EXEC_SET = game_set
 EXEC_BST = game
 
 # Source files
-SRC_SET = main_set.cpp card.cpp
+SRC_SET = main_set.cpp card.cpp card_list.cpp
 SRC_BST = main.cpp card.cpp card_list.cpp
 
 # Header files
@@ -18,7 +18,7 @@ HEADERS = card.h card_list.h
 # Default target
 all: $(EXEC_SET) $(EXEC_BST)
 
-# Build game_set (using std::set)
+# Build game_set (using std::set / custom BST if needed)
 $(EXEC_SET): $(SRC_SET) $(HEADERS)
 	$(CXX) $(CXXFLAGS) -o $(EXEC_SET) $(SRC_SET)
 
@@ -30,5 +30,5 @@ $(EXEC_BST): $(SRC_BST) $(HEADERS)
 clean:
 	rm -f $(EXEC_SET) $(EXEC_BST) *.o
 
-# Run test
 .PHONY: all clean
+
