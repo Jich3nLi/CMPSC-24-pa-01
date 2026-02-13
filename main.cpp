@@ -21,7 +21,6 @@ void printHand(const string& name, CardList& hand) {
     for (auto it = hand.begin(); it != hand.end(); ++it) {
         cout << *it << endl;
     }
-    cout << "\n";
 }
 
 // The main gameplay function
@@ -34,22 +33,23 @@ void playGame(CardList& alice, CardList& bob) {
         // Alice's turn: forward iteration (smallest to largest)
         Card toRemove;
         bool aliceFound = false;
+
         for (auto it = alice.begin(); it != alice.end(); ++it) {
             if (bob.contains(*it)) {
-                toRemove = *it;          // store matching card
+                toRemove = *it;  // store matching card
                 aliceFound = true;
-                break;                   // stop at first match
+                break;           // stop at first match
             }
         }
 
         if (aliceFound) {
-            cout << "Alice picked matching card " << toRemove << endl;
+            std::cout << "Alice picked matching card " << toRemove << std::endl;
             alice.remove(toRemove);
             bob.remove(toRemove);
             matchFound = true;
         }
 
-        if (!matchFound) break; // no match left, game ends
+        if (!matchFound) break; // no more matches
 
         matchFound = false;
 
@@ -59,14 +59,14 @@ void playGame(CardList& alice, CardList& bob) {
 
         for (auto it = bob.rbegin(); it != bob.rend(); --it) {
             if (alice.contains(*it)) {
-                bobRemove = *it;
+                bobRemove = *it;  // store matching card
                 bobFound = true;
-                break;                  // stop at first match
+                break;             // stop at first match
             }
         }
 
         if (bobFound) {
-            cout << "Bob picked matching card " << bobRemove << endl;
+            std::cout << "Bob picked matching card " << bobRemove << std::endl;
             alice.remove(bobRemove);
             bob.remove(bobRemove);
             matchFound = true;
@@ -74,6 +74,8 @@ void playGame(CardList& alice, CardList& bob) {
     }
     cout << endl;
 }
+
+
 
 
 
@@ -115,6 +117,7 @@ int main(int argc, char** argv) {
     playGame(alice, bob);
 
     printHand("Alice", alice);
+    cout << endl;
     printHand("Bob", bob);
 
     return 0;
