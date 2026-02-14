@@ -2,8 +2,68 @@
 #include <iostream>
 #include <cassert>
 #include <sstream>
+#include <string>
 #include "card_list.h"
 #include "card.h"
+
+using namespace std;
+
+// Forward declarations of game functions
+int cardValue(const string& str) {
+    if (str == "a") return 1;
+    if (str == "j") return 11;
+    if (str == "q") return 12;
+    if (str == "k") return 13;
+    return stoi(str);
+}
+
+void playGame(CardList& alice, CardList& bob) {
+    while (true) {
+        bool alicePicked = false;
+        bool bobPicked = false;
+
+        // Alice's turn: forward iteration (smallest to largest)
+        for (auto it = alice.begin(); it != alice.end(); ++it) {
+            if (bob.contains(*it)) {
+                Card matchingCard = *it;
+                std::cout << "Alice picked matching card " << matchingCard << std::endl;
+
+                // Remove from both hands
+                alice.remove(matchingCard);
+                bob.remove(matchingCard);
+
+                alicePicked = true;
+                break;  // stop after first match
+            }
+        }
+
+        // Bob's turn: reverse iteration (largest to smallest)
+        for (auto it = bob.rbegin(); it != bob.rend(); --it) {
+            if (alice.contains(*it)) {
+                Card matchingCard = *it;
+                std::cout << "Bob picked matching card " << matchingCard << std::endl;
+
+                // Remove from both hands
+                alice.remove(matchingCard);
+                bob.remove(matchingCard);
+
+                bobPicked = true;
+                break;  // stop after first match
+            }
+        }
+        // If neither picked a card, game ends
+        if (!alicePicked && !bobPicked) break;
+    }
+    cout << endl;
+}
+
+
+void printHand(const string& name, CardList& hand) {
+    cout << name << "'s cards:\n";
+    for (auto it = hand.begin(); it != hand.end(); ++it) {
+        cout << *it << endl;
+    }
+}
 
 using namespace std;
 
@@ -273,6 +333,74 @@ void testCardOperators() {
     cout << "Passed Card operators\n";
 }
 
+// Game Function TESTS
+
+void testPlayGameCommonCards() {
+    CardList alice, bob;
+    alice.insert(Card('c', 4));
+    alice.insert(Card('d', 5));
+    bob.insert(Card('c', 4));
+    bob.insert(Card('h', 7));
+
+    stringstream captured;
+    streambuf* oldCout = cout.rdbuf(captured.rdbuf());
+
+    playGame(alice, bob);
+    printHand("Alice", alice);
+    printHand("Bob", bob);
+
+    cout.rdbuf(oldCout);
+
+    string output = captured.str();
+    assert(output.find("Alice picked matching card c 4") != string::npos);
+    assert(!alice.contains(Card('c', 4)));
+    assert(!bob.contains(Card('c', 4)));
+
+    cout << "testPlayGameCommonCards passed\n";
+}
+
+void testPlayGameEmptyHand() {
+    CardList alice, bob;
+    alice.insert(Card('c', 4));
+    // Bob's hand empty
+
+    stringstream captured;
+    streambuf* oldCout = cout.rdbuf(captured.rdbuf());
+
+    playGame(alice, bob);
+    printHand("Alice", alice);
+    printHand("Bob", bob);
+
+    cout.rdbuf(oldCout);
+
+    // Alice's hand should remain unchanged
+    assert(alice.contains(Card('c', 4)));
+    assert(bob.begin() == bob.end());
+
+    cout << "testPlayGameEmptyHand passed\n";
+}
+
+void testPlayGameNoCommonCards() {
+    CardList alice, bob;
+    alice.insert(Card('c', 4));
+    bob.insert(Card('d', 5));
+
+    stringstream captured;
+    streambuf* oldCout = cout.rdbuf(captured.rdbuf());
+
+    playGame(alice, bob);
+    printHand("Alice", alice);
+    printHand("Bob", bob);
+
+    cout.rdbuf(oldCout);
+
+    // Hands should remain unchanged
+    assert(alice.contains(Card('c', 4)));
+    assert(bob.contains(Card('d', 5)));
+
+    cout << "testPlayGameNoCommonCards passed\n";
+}
+
 int main() {
     testOperatorLess();
     testOperatorGreater();
@@ -293,13 +421,13 @@ int main() {
     testClear();
     testCardOperators();
 
-    cout << "\nALL CARD_LIST TESTS PASSED SUCCESSFULLY!\n";
+    cout << "\nALL CARD_LIST TESTS PASSED SUCCESSFULLY!\n\n";
+
+    testPlayGameCommonCards();
+    testPlayGameEmptyHand();
+    testPlayGameNoCommonCards();
+
+    cout << "\nAll tests passed!\n";
 
     return 0;
 }
-
-
-
-
-
-
