@@ -1,160 +1,305 @@
-#include <iostream>
 #include <fstream>
-#include <string>
-#include "card.h"
+#include <iostream>
+#include <cassert>
+#include <sstream>
 #include "card_list.h"
-#include <set>
+#include "card.h"
 
 using namespace std;
 
-// Helper to convert string to card value
-int cardValue(const string& str) {
-    if (str == "a") return 1;
-    if (str == "j") return 11;
-    if (str == "q") return 12;
-    if (str == "k") return 13;
-    return stoi(str);
+// test card.h card.cpp
+void testOperatorLess() {
+    cout << "Testing operator< ...\n";
+
+    Card c1{'c', 2};
+    Card c2{'c', 5};
+    Card c3{'d', 1};
+    Card c4{'s', 13};
+    Card c5{'h', 7};
+
+    // 5 test cases
+    assert(c1 < c2);  // same suit, lower value
+    assert(c2 < c3);  // suit c < d
+    assert(c3 < c4);  // suit d < s
+    assert(c4 < c5);  // suit s < h (based on suitRank)
+    assert(!(c5 < c1)); // reverse check
+
+    cout << "Passed operator< tests\n";
 }
 
-// Print a hand stored in a std::set
-void printSetHand(const string& name, const set<Card>& hand) {
-    cout << name << "'s hand:\n";
-    for (const auto& c : hand) {
-        cout << c << endl;
-    }
-    cout << "\n";
+void testOperatorGreater() {
+    cout << "Testing operator> ...\n";
+
+    Card c1{'c', 2};
+    Card c2{'c', 5};
+    Card c3{'d', 1};
+    Card c4{'s', 13};
+    Card c5{'h', 7};
+
+    // 5 test cases
+    assert(c2 > c1);  // same suit, higher value
+    assert(c3 > c2);  // suit d > c
+    assert(c4 > c3);  // suit s > d
+    assert(c5 > c4);  // suit h > s
+    assert(!(c1 > c5)); // reverse check
+
+    cout << "Passed operator> tests\n";
 }
 
-// Print a hand stored in a CardList (BST)
-void printBSTHand(const string& name, CardList& hand) {
-    cout << name << "'s hand:\n";
-    for (auto it = hand.begin(); it != hand.end(); ++it) {
-        cout << *it << endl;
+void testOperatorEqual() {
+    cout << "Testing operator== ...\n";
+
+    Card c1{'c', 2};
+    Card c2{'c', 2};
+    Card c3{'c', 5};
+    Card c4{'d', 2};
+    Card c5{'h', 7};
+
+    // 5 test cases
+    assert(c1 == c2); // same suit & value
+    assert(!(c1 == c3)); // different value
+    assert(!(c1 == c4)); // different suit
+    assert(!(c1 == c5)); // different suit & value
+    assert(c2 == c1); // symmetric
+
+    cout << "Passed operator== tests\n";
+}
+
+void testOutputOperator() {
+    cout << "Testing operator<< ...\n";
+
+    Card c1{'c', 1};   // ace
+    Card c2{'d', 11};  // jack
+    Card c3{'s', 12};  // queen
+    Card c4{'h', 13};  // king
+    Card c5{'c', 7};   // number
+
+    stringstream ss;
+
+    ss << c1;
+    assert(ss.str() == "c a");
+
+    ss.str(""); ss.clear();
+    ss << c2;
+    assert(ss.str() == "d j");
+
+    ss.str(""); ss.clear();
+    ss << c3;
+    assert(ss.str() == "s q");
+
+    ss.str(""); ss.clear();
+    ss << c4;
+    assert(ss.str() == "h k");
+
+    ss.str(""); ss.clear();
+    ss << c5;
+    assert(ss.str() == "c 7");
+
+    cout << "Passed operator<< tests\n";
+}
+
+// test card_list.h card_list.cpp
+
+void testInsertAndContains() {
+    cout << "Testing insert & contains...\n";
+    CardList list;
+
+    Card c1{'c', 5};
+    Card c2{'d', 3};
+    Card c3{'s', 10};
+
+    list.insert(c1);
+    list.insert(c2);
+    list.insert(c3);
+
+    assert(list.contains(c1));
+    assert(list.contains(c2));
+    assert(list.contains(c3));
+    assert(!list.contains(Card{'h', 1}));
+
+    cout << "Passed insert & contains\n";
+}
+
+void testMinMax() {
+    cout << "Testing getMin & getMax...\n";
+    CardList list;
+
+    list.insert({'s', 10});
+    list.insert({'c', 2});
+    list.insert({'h', 13});
+    list.insert({'d', 5});
+
+    assert(list.begin() != list.end());
+    assert((*list.begin()).getSuit() == 'c');
+
+    CardList::Iterator it = list.rbegin();
+    assert((*it).getSuit() == 'h');
+
+    cout << "Passed getMin & getMax\n";
+}
+
+void testRemoveLeaf() {
+    cout << "Testing remove leaf node...\n";
+    CardList list;
+    list.insert({'c', 2});
+    list.insert({'d', 3});
+    list.insert({'s', 4});
+
+    list.remove({'s', 4});
+    assert(!list.contains({'s', 4}));
+
+    cout << "Passed remove leaf\n";
+}
+
+void testRemoveOneChild() {
+    cout << "Testing remove node with one child...\n";
+    CardList list;
+    list.insert({'c', 2});
+    list.insert({'d', 3});
+    list.insert({'s', 4});
+    list.insert({'h', 5});
+
+    list.remove({'s', 4});
+    assert(!list.contains({'s', 4}));
+    assert(list.contains({'h', 5}));
+
+    cout << "Passed remove one child\n";
+}
+
+void testRemoveTwoChildren() {
+    cout << "Testing remove node with two children...\n";
+    CardList list;
+    list.insert({'d', 5});
+    list.insert({'c', 3});
+    list.insert({'h', 7});
+    list.insert({'s', 6});
+    list.insert({'h', 9});
+
+    list.remove({'d', 5});
+    assert(!list.contains({'d', 5}));
+    assert(list.contains({'s', 6}));
+
+    cout << "Passed remove two children\n";
+}
+
+void testCopyConstructor() {
+    cout << "Testing copy constructor...\n";
+    CardList list;
+    list.insert({'c', 1});
+    list.insert({'d', 2});
+
+    CardList copy(list);
+
+    assert(copy.contains({'c',1}));
+    assert(copy.contains({'d',2}));
+
+    cout << "Passed copy constructor\n";
+}
+
+void testAssignmentOperator() {
+    cout << "Testing assignment operator...\n";
+    CardList list1;
+    list1.insert({'c', 1});
+    list1.insert({'d', 2});
+
+    CardList list2;
+    list2 = list1;
+
+    assert(list2.contains({'c',1}));
+    assert(list2.contains({'d',2}));
+
+    cout << "Passed assignment operator\n";
+}
+
+void testIteratorForward() {
+    cout << "Testing forward iterator...\n";
+    CardList list;
+    list.insert({'c', 1});
+    list.insert({'d', 2});
+    list.insert({'s', 3});
+
+    int count = 0;
+    for (auto it = list.begin(); it != list.end(); ++it) {
+        cout << *it << " ";
+        count++;
     }
-    cout << "\n";
+    cout << endl;
+
+    assert(count == 3);
+    cout << "Passed forward iterator\n";
+}
+
+void testIteratorBackward() {
+    cout << "Testing reverse iterator...\n";
+    CardList list;
+    list.insert({'c', 1});
+    list.insert({'d', 2});
+    list.insert({'s', 3});
+
+    int count = 0;
+    for (auto it = list.rbegin(); it != list.rend(); --it) {
+        cout << *it << " ";
+        count++;
+    }
+    cout << endl;
+
+    assert(count == 3);
+    cout << "Passed reverse iterator\n";
+}
+
+void testClear() {
+    cout << "Testing clear...\n";
+    CardList list;
+    list.insert({'c',1});
+    list.insert({'d',2});
+
+    list.clear();
+    assert(list.begin() == list.end());
+
+    cout << "Passed clear\n";
+}
+
+void testCardOperators() {
+    cout << "Testing Card operators...\n";
+
+    Card c1{'c', 5};
+    Card c2{'d', 5};
+    Card c3{'c', 5};
+
+    assert(c1 < c2);
+    assert(c2 > c1);
+    assert(c1 == c3);
+
+    cout << "Passed Card operators\n";
 }
 
 int main() {
-    // --- Test std::set implementation ---
-    cout << "=== Testing std::set implementation ===\n";
+    testOperatorLess();
+    testOperatorGreater();
+    testOperatorEqual();
+    testOutputOperator();
 
-    set<Card> aliceSet;
-    set<Card> bobSet;
+    cout << "\nALL Card TESTS PASSED!\n\n";
 
-    ifstream aliceFile("alice_cards.txt");
-    ifstream bobFile("bob_cards.txt");
-    string line;
+    testInsertAndContains();
+    testMinMax();
+    testRemoveLeaf();
+    testRemoveOneChild();
+    testRemoveTwoChildren();
+    testCopyConstructor();
+    testAssignmentOperator();
+    testIteratorForward();
+    testIteratorBackward();
+    testClear();
+    testCardOperators();
 
-    while (getline(aliceFile, line)) {
-        char suit = line[0];
-        string valStr = line.substr(2);
-        aliceSet.insert(Card(suit, cardValue(valStr)));
-    }
+    cout << "\nALL CARD_LIST TESTS PASSED SUCCESSFULLY!\n";
 
-    while (getline(bobFile, line)) {
-        char suit = line[0];
-        string valStr = line.substr(2);
-        bobSet.insert(Card(suit, cardValue(valStr)));
-    }
-
-    // Print initial hands
-    printSetHand("Alice", aliceSet);
-    printSetHand("Bob", bobSet);
-
-    // Play game using set
-    bool match = true;
-    while (match) {
-        match = false;
-
-        // Alice's turn (smallest → largest)
-        for (auto it = aliceSet.begin(); it != aliceSet.end(); ++it) {
-            if (bobSet.count(*it)) {
-                cout << "Alice picked matching card " << *it << "\n";
-                bobSet.erase(*it);
-                aliceSet.erase(it);
-                match = true;
-                break;
-            }
-        }
-        if (!match) break;
-
-        match = false;
-        // Bob's turn (largest → smallest)
-        for (auto it = prev(bobSet.end()); ; --it) {
-            if (aliceSet.count(*it)) {
-                cout << "Bob picked matching card " << *it << "\n";
-                aliceSet.erase(*it);
-                bobSet.erase(it);
-                match = true;
-                break;
-            }
-            if (it == bobSet.begin()) break;
-        }
-    }
-
-    printSetHand("Alice", aliceSet);
-    printSetHand("Bob", bobSet);
-
-    // --- Test BST implementation ---
-    cout << "\n=== Testing BST implementation ===\n";
-
-    CardList aliceBST;
-    CardList bobBST;
-
-    // Reset file streams
-    aliceFile.clear(); aliceFile.seekg(0);
-    bobFile.clear(); bobFile.seekg(0);
-
-    while (getline(aliceFile, line)) {
-        char suit = line[0];
-        string valStr = line.substr(2);
-        aliceBST.insert(Card(suit, cardValue(valStr)));
-    }
-
-    while (getline(bobFile, line)) {
-        char suit = line[0];
-        string valStr = line.substr(2);
-        bobBST.insert(Card(suit, cardValue(valStr)));
-    }
-
-    // Print initial hands
-    printBSTHand("Alice", aliceBST);
-    printBSTHand("Bob", bobBST);
-
-    // Play game using iterators
-    match = true;
-    while (match) {
-        match = false;
-
-        // Alice's turn (smallest → largest)
-        for (auto it = aliceBST.begin(); it != aliceBST.end(); ++it) {
-            if (bobBST.contains(*it)) {
-                cout << "Alice picked matching card " << *it << "\n";
-                bobBST.remove(*it);
-                aliceBST.remove(*it);
-                match = true;
-                break;
-            }
-        }
-        if (!match) break;
-
-        match = false;
-        // Bob's turn (largest → smallest)
-        for (auto it = bobBST.rbegin(); it != bobBST.rend(); --it) {
-            if (aliceBST.contains(*it)) {
-                cout << "Bob picked matching card " << *it << "\n";
-                aliceBST.remove(*it);
-                bobBST.remove(*it);
-                match = true;
-                break;
-            }
-        }
-    }
-
-    printBSTHand("Alice", aliceBST);
-    printBSTHand("Bob", bobBST);
-
-    aliceFile.close();
-    bobFile.close();
     return 0;
 }
+
+
+
+
+
+
